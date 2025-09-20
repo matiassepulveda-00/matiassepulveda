@@ -73,7 +73,12 @@ class BoletaHonorarios(models.Model):
     # Detalles de la prestación
     descripcion_servicio = fields.Text('Descripción del Servicio', required=True)
     valor_bruto = fields.Monetary('Valor Bruto', required=True, currency_field='currency_id', tracking=True)
-    currency_id = fields.Many2one('res.currency', string='Moneda', default=lambda self: self.env.company.currency_id)
+    currency_id = fields.Many2one(
+        'res.currency',
+        string='Moneda',
+        default=lambda self: self.env.company.currency_id,
+        required=True,  # CHANGE: obligatorio para campos Monetary y pruebas
+    )
 
     # Respuesta y archivo
     response_data = fields.Text('Respuesta API')
