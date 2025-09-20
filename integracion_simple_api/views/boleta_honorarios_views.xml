@@ -22,7 +22,7 @@
             <group string="Información General">
               <field name="numero_boleta"/>
               <field name="fecha_emision"/>
-              <field name="currency_id" invisible="1"/>
+              <!-- REMOVED: currency_id invisible para evitar error de 'always invisible field' en Odoo 18 -->
             </group>
             <group string="Estado">
               <field name="fecha_procesamiento"/>
@@ -85,9 +85,9 @@
     </field>
   </record>
 
-  <!-- LIST (cambiado a TREE por compatibilidad amplia) -->
-  <record id="view_boleta_honorarios_tree" model="ir.ui.view">
-    <field name="name">boleta.honorarios.tree</field>
+  <!-- LIST -->
+  <record id="view_boleta_honorarios_list" model="ir.ui.view">
+    <field name="name">boleta.honorarios.list</field>
     <field name="model">boleta.honorarios</field>
     <field name="arch" type="xml">
       <list string="Boletas de Honorarios"
@@ -111,13 +111,13 @@
   <record id="action_boleta_honorarios" model="ir.actions.act_window">
     <field name="name">Boletas de Honorarios</field>
     <field name="res_model">boleta.honorarios</field>
-    <field name="view_mode">tree,form</field>
+    <field name="view_mode">list,form</field>
     <field name="help" type="html">
       <p>Administra las boletas de honorarios integradas con SimpleAPI.</p>
     </field>
   </record>
 
-  <!-- MENÚS (no requieren prefijo del módulo en el id) -->
+  <!-- MENÚS -->
   <menuitem id="menu_boleta_honorarios_root" name="Boletas Honorarios" sequence="50"/>
   <menuitem id="menu_boleta_honorarios" name="Boletas de Honorarios"
             parent="menu_boleta_honorarios_root" action="action_boleta_honorarios" sequence="10"/>
