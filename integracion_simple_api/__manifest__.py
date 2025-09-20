@@ -1,34 +1,59 @@
 # -*- coding: utf-8 -*-
 {
-    'name': "integracion_simple_api",
+    # CHANGE: nombre legible de la App
+    'name': 'Boletas de Honorarios SimpleAPI',  # antes: "integracion_simple_api"
 
-    'summary': "Short (1 phrase/line) summary of the module's purpose",
+    # CHANGE: versión con formato Odoo 18
+    'version': '18.0.1.0.0',  # antes: '0.1'
 
+    # CHANGE: categoría coherente con contabilidad/localización
+    'category': 'Accounting/Localization',  # antes: 'Uncategorized'
+
+    # CHANGE: resumen claro
+    'summary': 'Integración con SimpleAPI para emisión automática de boletas de honorarios',  # antes: resumen genérico
+
+    # CHANGE: descripción ampliada (puedes ajustar texto/autor/empresa después)
     'description': """
-Long description of module's purpose
+        Módulo para la creación y autodescarga de boletas de honorarios
+        mediante integración con SimpleAPI Chile.
+        
+        Características:
+        - Emisión automática de boletas de honorarios
+        - Descarga automática de PDF
+        - Integración directa con SII Chile
+        - Gestión de estados y seguimiento
     """,
 
-    'author': "My Company",
-    'website': "https://www.yourcompany.com",
+    # CHANGE: autor y sitio (puedes poner tus datos reales)
+    'author': 'Tu Empresa',  # antes: "My Company"
+    'website': 'https://www.tuempresa.com',  # antes: yourcompany.com
 
-    # Categories can be used to filter modules in modules listing
-    # Check https://github.com/odoo/odoo/blob/15.0/odoo/addons/base/data/ir_module_category_data.xml
-    # for the full list
-    'category': 'Uncategorized',
-    'version': '0.1',
+    # CHANGE: licencia explícita
+    'license': 'LGPL-3',  # antes: no definida
 
-    # any module necessary for this one to work correctly
-    'depends': ['base'],
+    # CHANGE: dependencias del proyecto del repo
+    'depends': ['base', 'account', 'contacts', 'mail', 'web'],  # antes: ['base']
 
-    # always loaded
+    # CHANGE: declaramos datos EXACTAMENTE como en el repo (los crearemos en el próximo paso)
     'data': [
-        # 'security/ir.model.access.csv',
-        'views/views.xml',
-        'views/templates.xml',
+        'security/ir.model.access.csv',         # nuevo
+        'views/boleta_honorarios_views.xml',    # nuevo
+        'views/res_config_settings_views.xml',  # nuevo
+        # 'data/ir_cron_data.xml',              # opcional (lo dejamos comentado por ahora)
     ],
-    # only loaded in demonstration mode
-    'demo': [
-        'demo/demo.xml',
-    ],
-}
 
+    # CHANGE: assets backend (dejamos la clave por compatibilidad; sin archivos por ahora)
+    'assets': {
+        'web.assets_backend': [
+            # 'integracion_simple_api/static/src/js/preview_iframe.js',  # lo activaremos si lo usamos
+        ],
+    },
+
+    # CHANGE: marcamos como instalable/aplicación
+    'installable': True,
+    'auto_install': False,
+    'application': True,
+
+    # CHANGE: quitamos 'demo' para no arrastrar data de ejemplo innecesaria
+    # 'demo': [],
+}
