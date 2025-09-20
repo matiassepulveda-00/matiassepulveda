@@ -90,7 +90,7 @@
     <field name="name">boleta.honorarios.tree</field>
     <field name="model">boleta.honorarios</field>
     <field name="arch" type="xml">
-      <tree string="Boletas de Honorarios"
+      <list string="Boletas de Honorarios"
             decoration-success="state == 'downloaded'"
             decoration-warning="state == 'processing'"
             decoration-danger="state == 'error'"
@@ -103,7 +103,7 @@
         <field name="email_destinatario"/>
         <field name="state" widget="badge"/>
         <field name="fecha_procesamiento"/>
-      </tree>
+      </list>
     </field>
   </record>
 
