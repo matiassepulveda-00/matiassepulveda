@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- FORM -->
+  <record id="view_boleta_honorarios_form" model="ir.ui.view">
+    <field name="name">boleta.honorarios.form</field>
+    <field name="model">boleta.honorarios</field>
+    <field name="arch" type="xml">
+      <form string="Boleta de Honorarios">
+        <header>
+          <button name="action_emitir_boleta" string="Emitir Boleta" type="object" class="btn-primary"/>
+          <!-- Botón legacy opcional -->
+          <button name="action_anular_boleta" string="Anular (legacy)" type="object" class="btn-secondary"
+                  confirm="¿Está seguro de anular esta boleta (legacy)?"/>
+          <button name="action_anular_boleta_path" string="Anular por folio" type="object" class="btn-danger"
+                  confirm="Se anulará la boleta en SII vía SimpleAPI usando el motivo seleccionado. ¿Continuar?"/>
+          <field name="state" widget="statusbar" statusbar_visible="draft,processing,emitted,downloaded,cancelled,error"/>
+        </header>
+
+        <sheet>
+          <group>
+            <group string="Información General">
+              <field name="numero_boleta"/>
+              <field name="fecha_emision"/>
+              <field name="currency_id" invisible="1"/>
+            </group>
+            <group string="Estado">
+              <field name="fecha_procesamiento"/>
+              <field name="intentos"/>
+            </group>
+          </group>
+
+          <group string="Datos del Usuario Emisor">
+            <field name="rut_usuario" placeholder="12345678-9"/>
+            <field name="password_sii" password="True"/>
+            <field name="direccion_emisor"/>
+            <field name="retencion"/>
+          </group>
+
+          <group string="Datos del Receptor">
+            <group>
+              <field name="partner_id" options="{'no_create': True}" placeholder="Seleccionar receptor existente (opcional)"/>
+              <field name="receptor_rut" placeholder="12345678-9" required="1"/>
+              <field name="receptor_nombre" placeholder="Nombre completo del receptor" required="1"/>
+            </group>
+            <group>
+              <field name="receptor_direccion" placeholder="Dirección completa del receptor"/>
+              <field name="receptor_region"/>
+              <field name="receptor_comuna" placeholder="Comuna del receptor"/>
+            </group>
+          </group>
+
+          <group string="Detalles de la Prestación">
+            <field name="descripcion_servicio" placeholder="Descripción detallada del servicio prestado"/>
+            <field name="valor_bruto" widget="monetary"/>
+          </group>
+
+          <group string="Envío por correo">
+            <field name="email_destinatario" placeholder="correo@dominio.cl" widget="email" required="1"/>
+          </group>
+
+          <group string="Anulación">
+            <group>
+              <field name="motivo_anulacion"/>
+            </group>
+            <span>Para anular, seleccione el motivo y presione 'Anular por folio'. La acción validará el estado y el folio.</span>
+          </group>
+
+          <notebook>
+            <page string="Respuesta API">
+              <field name="response_data" widget="text" readonly="1"/>
+            </page>
+            <page string="Errores">
+              <field name="error_message" readonly="1"/>
+            </page>
+          </notebook>
+        </sheet>
+
+        <div class="oe_chatter">
+          <field name="message_follower_ids"/>
+          <field name="activity_ids"/>
+          <field name="message_ids"/>
+        </div>
+      </form>
+    </field>
+  </record>
+
+  <!-- LIST (cambiado a TREE por compatibilidad amplia) -->
+  <record id="view_boleta_honorarios_tree" model="ir.ui.view">
+    <field name="name">boleta.honorarios.tree</field>
+    <field name="model">boleta.honorarios</field>
+    <field name="arch" type="xml">
+      <tree string="Boletas de Honorarios"
+            decoration-success="state == 'downloaded'"
+            decoration-warning="state == 'processing'"
+            decoration-danger="state == 'error'"
+            decoration-info="state == 'draft'">
+        <field name="numero_boleta"/>
+        <field name="fecha_emision"/>
+        <field name="partner_id"/>
+        <field name="receptor_nombre"/>
+        <field name="valor_bruto" widget="monetary"/>
+        <field name="email_destinatario"/>
+        <field name="state" widget="badge"/>
+        <field name="fecha_procesamiento"/>
+      </tree>
+    </field>
+  </record>
+
+  <!-- ACTION -->
+  <record id="action_boleta_honorarios" model="ir.actions.act_window">
+    <field name="name">Boletas de Honorarios</field>
+    <field name="res_model">boleta.honorarios</field>
+    <field name="view_mode">tree,form</field>
+    <field name="help" type="html">
+      <p>Administra las boletas de honorarios integradas con SimpleAPI.</p>
+    </field>
+  </record>
+
+  <!-- MENÚS (no requieren prefijo del módulo en el id) -->
+  <menuitem id="menu_boleta_honorarios_root" name="Boletas Honorarios" sequence="50"/>
+  <menuitem id="menu_boleta_honorarios" name="Boletas de Honorarios"
+            parent="menu_boleta_honorarios_root" action="action_boleta_honorarios" sequence="10"/>
+
+</odoo>
