@@ -36,14 +36,14 @@
     <field name="model">boleta.honorarios</field>
     <field name="inherit_id" ref="integracion_simple_api.view_boleta_honorarios_form"/>
     <field name="arch" type="xml">
-      <header position="inside">
+      <xpath expr="//header" position="inside">
         <button name="%(action_bhe_mail_wizard)d"
                 string="Enviar por correo"
                 type="action"
                 class="btn-secondary"
-                attrs="{'invisible': ['|', ('state', 'not in', ('emitted','downloaded')), ('numero_boleta','=',False)]}"
-                context="{'default_email': email_destinatario}"/>
-      </header>
+                context="{'default_email': email_destinatario}"
+                invisible="['|', ('state','not in',('emitted','downloaded')), ('numero_boleta','=',False)]"/>
+      </xpath>
     </field>
   </record>
 
