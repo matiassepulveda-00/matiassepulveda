@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+  <!-- Acción wizard -->
+  <record id="action_bhe_mail_wizard" model="ir.actions.act_window">
+    <field name="name">Enviar por Correo</field>
+    <field name="res_model">bhe.mail.wizard</field>
+    <field name="view_mode">form</field>
+    <field name="target">new</field>
+  </record>
+
+  <!-- Botón en boleta -->
+  <record id="view_boleta_honorarios_form_inherit_mail" model="ir.ui.view">
+    <field name="name">boleta.honorarios.form.inherit.mail</field>
+    <field name="model">boleta.honorarios</field>
+    <field name="inherit_id" ref="integracion_simple_api.view_boleta_honorarios_form"/>
+    <field name="arch" type="xml">
+      <header position="inside">
+        <button name="%(action_bhe_mail_wizard)d"
+                string="Enviar por correo"
+                type="action"
+                class="btn-secondary"
+                context="{'default_email': email_destinatario}"/>
+      </header>
+    </field>
+  </record>
+
+</odoo>
