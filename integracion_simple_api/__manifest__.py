@@ -39,7 +39,7 @@
         'security/ir.model.access.csv',         # nuevo
         'views/boleta_honorarios_views.xml',    # nuevo
         'views/bhe_mail_views.xml', #nuevo
-        'views/res_config_settings_views.xml',  # nuevo
+        'views/res_config_settings_views.xml',  # nuevolk
         # 'data/ir_cron_data.xml',              # opcional (lo dejamos comentado por ahora)
     ],
 
