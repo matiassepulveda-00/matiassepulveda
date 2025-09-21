@@ -1,2 +1,3 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_boleta_honorarios_user,boleta.honorarios.user,model_boleta_honorarios,base.group_user,1,1,1,1
+access_bhe_mail_wizard,bhe.mail.wizard,model_bhe_mail_wizard,base.group_user,1,1,1,0
