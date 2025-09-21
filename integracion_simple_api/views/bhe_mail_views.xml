@@ -1,48 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
 
-  <!-- Vista del wizard -->
-  <record id="view_bhe_mail_wizard_form" model="ir.ui.view">
-    <field name="name">bhe.mail.wizard.form</field>
-    <field name="model">bhe.mail.wizard</field>
-    <field name="arch" type="xml">
-      <form string="Enviar boleta por correo">
-        <sheet>
-          <group>
-            <field name="email" placeholder="correo@dominio.cl"/>
-            <field name="wait_seconds"/>
-          </group>
-        </sheet>
-        <footer>
-          <button name="action_send" type="object" string="Enviar" class="btn-primary"/>
-          <button string="Cancelar" class="btn-secondary" special="cancel"/>
-        </footer>
-      </form>
-    </field>
-  </record>
-
   <!-- Acción del wizard -->
   <record id="action_bhe_mail_wizard" model="ir.actions.act_window">
-    <field name="name">Enviar por Correo</field>
+    <field name="name">Enviar por correo (SimpleAPI)</field>
     <field name="res_model">bhe.mail.wizard</field>
     <field name="view_mode">form</field>
-    <field name="view_id" ref="view_bhe_mail_wizard_form"/>
     <field name="target">new</field>
   </record>
 
-  <!-- Botón en boleta (herencia del form existente) -->
-  <record id="view_boleta_honorarios_form_inherit_mail" model="ir.ui.view">
-    <field name="name">boleta.honorarios.form.inherit.mail</field>
+  <!-- Botón en el header del form de boleta -->
+  <record id="view_boleta_honorarios_form_inherit_mail_button" model="ir.ui.view">
+    <field name="name">boleta.honorarios.form.inherit.mail.button</field>
     <field name="model">boleta.honorarios</field>
     <field name="inherit_id" ref="integracion_simple_api.view_boleta_honorarios_form"/>
     <field name="arch" type="xml">
       <xpath expr="//header" position="inside">
         <button name="%(action_bhe_mail_wizard)d"
-                string="Enviar por correo"
                 type="action"
-                class="btn-secondary"
-                context="{'default_email': email_destinatario}"
-                invisible="['|', ('state','not in',('emitted','downloaded')), ('numero_boleta','=',False)]"/>
+                string="Enviar por correo"
+                class="btn-secondary"/>
       </xpath>
     </field>
   </record>
