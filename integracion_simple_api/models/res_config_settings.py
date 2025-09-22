@@ -20,6 +20,6 @@ class ResConfigSettings(models.TransientModel):
     simpleapi_timeout = fields.Integer(
         string='Timeout (segundos)',
         config_parameter='boleta_honorarios.simpleapi_timeout',
-        default=30,
+        default=10,
         help='Tiempo límite para las peticiones HTTP'
     )

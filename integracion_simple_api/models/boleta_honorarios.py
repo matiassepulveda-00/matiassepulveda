@@ -427,3 +427,23 @@ class BoletaHonorarios(models.Model):
         resto = suma % 11
         dv_calc = '0' if resto == 0 else 'K' if resto == 1 else str(11 - resto)
         return dv == dv_calc
+
+    def action_open_mail_wizard(self):
+        """
+        Abre el wizard bhe.mail.wizard para enviar la boleta por correo.
+        Se prellena con el correo del destinatario de la boleta si existe.
+        """
+        self.ensure_one()
+        ctx = {
+            'default_email': self.email_destinatario or '',
+            'active_id': self.id,
+            'active_model': self._name,
+        }
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Enviar por correo (SimpleAPI)'),
+            'res_model': 'bhe.mail.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': ctx,
+        }
