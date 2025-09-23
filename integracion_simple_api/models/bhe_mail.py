@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
+import time
+import logging
 import requests
+
 from odoo import models, fields, _
 from odoo.exceptions import UserError, ValidationError
-import time
+
+_logger = logging.getLogger(__name__)
 
 
 class BHEMailWizard(models.TransientModel):
@@ -20,13 +24,13 @@ class BHEMailWizard(models.TransientModel):
     email = fields.Char(
         string='Correo destinatario',
         required=True,
-        help="Correo al cual SimpleAPI enviará la boleta PDF"
+        help="Correo al cual SimpleAPI enviará la boleta PDF",
     )
     wait_seconds = fields.Integer(
         string='Esperar (seg.)',
         default=1,
         help="Tiempo de espera (segundos) antes de llamar a la API. "
-             "Útil si acabas de emitir una boleta y quieres dar tiempo a SimpleAPI."
+             "Útil si acabas de emitir una boleta y quieres dar tiempo a SimpleAPI.",
     )
 
     # ------------------------
@@ -34,78 +38,92 @@ class BHEMailWizard(models.TransientModel):
     # ------------------------
     def action_send(self):
         """
-        Acción del botón 'Enviar'.
-        1. Valida la boleta activa.
-        2. Construye la URL con folio y año.
-        3. Llama a SimpleAPI para pedir envío de correo.
-        4. Deja trazabilidad en el chatter de la boleta.
+        1) Obtiene la boleta activa.
+        2) Valida datos esenciales (folio, email, fecha).
+        3) Llama al endpoint de SimpleAPI para enviar por correo.
+        4) Registra trazabilidad en el chatter.
         """
-        self.ensure_one()  # Asegura que se ejecuta sobre un solo wizard.
+        self.ensure_one()
 
-        # 1) Buscar boleta activa (contexto de donde se abrió el wizard)
+        # 1) Boleta activa
         active_id = self.env.context.get('active_id')
         if not active_id:
             raise UserError(_("No se encontró la boleta activa."))
-        boleta = self.env['boleta.honorarios'].browse(active_id)
-        if not boleta.exists():
+
+        boleta = self.env['boleta.honorarios'].browse(active_id).exists()
+        if not boleta:
             raise UserError(_("La boleta no existe."))
 
-        # 2) Validaciones previas de negocio
-        if boleta.state not in ('emitted', 'downloaded'):
-            raise ValidationError(_("Solo se puede solicitar correo para boletas emitidas o descargadas."))
+        # 2) Validaciones mínimas (permitimos cualquier estado)
         if not boleta.numero_boleta:
             raise ValidationError(_("La boleta no tiene folio."))
+
         if not self.email or '@' not in self.email:
             raise ValidationError(_("Debe indicar un correo válido."))
+
         if not boleta.fecha_emision:
             raise ValidationError(_("La boleta no tiene fecha de emisión."))
 
-        # 3) Pequeña espera opcional (para dar tiempo a SimpleAPI)
-        if self.wait_seconds:
+        # Espera opcional
+        if (self.wait_seconds or 0) > 0:
             time.sleep(self.wait_seconds)
 
-        # 4) Año desde la fecha de emisión (requerido por SimpleAPI en la ruta)
         anio = boleta.fecha_emision.year
 
-        # 5) Configuración de SimpleAPI desde Settings
-        config = boleta.get_simpleapi_config()
+        # 3) Configuración
+        cfg = boleta.get_simpleapi_config()
+        base_url = (cfg.get('base_url') or '').rstrip('/')
+        api_key = cfg.get('api_key') or ''
+        timeout = int(cfg.get('timeout') or 30)
 
-        # Construcción de la URL con folio y año
-        url = f"{config['base_url']}/bhe/mail/{boleta.numero_boleta}/{anio}"
-
-        # Headers de autenticación y tipo de contenido
+        url = f"{base_url}/bhe/mail/{boleta.numero_boleta}/{anio}"
         headers = {
-            'Authorization': config['api_key'],
+            'Authorization': api_key,
             'Content-Type': 'application/json',
-            'Accept': 'application/json'
+            'Accept': 'application/json',
+            'User-Agent': 'odoo-18-bhe',
         }
-
-        # Payload que SimpleAPI requiere
         payload = {
-            'RutUsuario': boleta.rut_usuario.replace('.', '').replace('-', ''),
-            'PasswordSII': boleta.password_sii,
-            'Correo': self.email
+            'RutUsuario': (boleta.rut_usuario or '').replace('.', '').replace('-', ''),
+            'PasswordSII': boleta.password_sii or '',
+            'Correo': self.email,
         }
 
-        # 6) Llamada POST a SimpleAPI
-        resp = requests.post(url, json=payload, headers=headers, timeout=config['timeout'])
-
-        # 7) Validación de respuesta HTTP
-        if resp.status_code not in (200, 202):
-            # Mostrar un error claro en Odoo si falla
-            raise UserError(_("Error en API (HTTP %s): %s") % (resp.status_code, resp.text[:200]))
-
-        # 8) Intentar parsear JSON, si no es posible se guarda texto plano
-        try:
-            data = resp.json()
-        except Exception:
-            data = {'message': resp.text}
-
-        # 9) Dejar trazabilidad en el chatter de la boleta
-        boleta.message_post(
-            body=_("Solicitud de envío de correo a %s realizada.") % self.email,
-            message_type='notification'
+        _logger.info(
+            "[BHE][MAIL] POST %s -> to=%s (folio=%s, anio=%s)",
+            url, self.email, boleta.numero_boleta, anio
         )
 
-        # 10) Cerrar el wizard (acción estándar de Odoo)
-        return {'type': 'ir.actions.act_window_close'}
+        # 4) Llamada y manejo de respuesta
+        try:
+            resp = requests.post(url, json=payload, headers=headers, timeout=timeout)
+            body_preview = (resp.text or '')[:300]
+            _logger.info("[BHE][MAIL] status=%s body=%s", resp.status_code, body_preview)
+
+            if resp.status_code in (200, 202):
+                # Éxito normal
+                boleta.message_post(
+                    body=_("Correo solicitado a SimpleAPI (folio %s): %s")
+                         % (boleta.numero_boleta, self.email),
+                    message_type='notification',
+                )
+                return {'type': 'ir.actions.act_window_close'}
+
+            if resp.status_code == 500:
+                # Soft-success: el proveedor a veces devuelve 500 aunque el SII envíe el mail
+                boleta.message_post(
+                    body=_("SimpleAPI devolvió HTTP 500 al solicitar el envío por correo, "
+                           "pero es posible que el SII lo haya enviado de todas formas. "
+                           "Revise su bandeja. Respuesta: %s") % body_preview,
+                    message_type='comment',
+                )
+                _logger.warning("[BHE][MAIL] HTTP 500 recibido; tratamos como 'soft-success'.")
+                return {'type': 'ir.actions.act_window_close'}
+
+            # Otros códigos se tratan como error real
+            raise UserError(_("Error en API (HTTP %s): %s") % (resp.status_code, body_preview))
+
+        except requests.Timeout:
+            raise UserError(_("La solicitud a SimpleAPI excedió el tiempo de espera (%ss).") % timeout)
+        except Exception as e:
+            raise UserError(_("Error inesperado llamando a SimpleAPI: %s") % str(e))
