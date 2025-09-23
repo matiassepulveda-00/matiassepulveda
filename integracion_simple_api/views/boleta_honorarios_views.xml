@@ -118,7 +118,7 @@
   </record>
 
   <!-- MENÚS -->
-  <menuitem id="menu_boleta_honorarios_root" name="Boletas Honorarios" sequence="50"/>
+  <menuitem id="menu_boleta_honorarios_root" name="Boletas Honorarios" sequence="50" web_icon="integracion_simple_api,static/description/icon.png"/>
   <menuitem id="menu_boleta_honorarios" name="Boletas de Honorarios"
             parent="menu_boleta_honorarios_root" action="action_boleta_honorarios" sequence="10"/>
 
