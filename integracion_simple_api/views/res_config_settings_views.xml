@@ -7,7 +7,7 @@
     <field name="arch" type="xml">
       <xpath expr="//form" position="inside">
         <!-- CHANGE: name único para evitar colisiones con otros módulos -->
-        <app name="integracion_simple_api" string="Boletas Honorarios" data-string="Boletas Honorarios">
+        <app name="integracion_simple_api" string="Boletas Honorarios" data-string="Boletas Honorarios" web_icon="integracion_simple_api,static/description/icon.png">
           <block title="Configuración SimpleAPI">
             <setting help="Configurar conexión con SimpleAPI Chile">
               <div class="content-group">
