@@ -46,8 +46,10 @@
     # CHANGE: assets backend (dejamos la clave por compatibilidad; sin archivos por ahora)
     'assets': {
         'web.assets_backend': [
-            # 'integracion_simple_api/static/src/js/preview_iframe.js',  # lo activaremos si lo usamos
+            'integracion_simple_api/static/src/js/preview_iframe.js',  # lo activaremos si lo usamos
         ],
+        'images': ['static/description/icon.png'],  # ← muestra icono en Apps
+        'installable': True,
     },
 
     # CHANGE: marcamos como instalable/aplicación
