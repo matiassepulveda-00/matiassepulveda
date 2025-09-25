@@ -6,7 +6,7 @@ class ResConfigSettings(models.TransientModel):
     simpleapi_api_key = fields.Char(
         string='SimpleAPI Key',
         config_parameter='boleta_honorarios.simpleapi_api_key',
-        default='5691-N280-6392-8136-3879',
+        default='5933-N920-6392-7812-8479', #API PRUEBA
         help='API Key proporcionada por SimpleAPI'
     )
     
